@@ -1,411 +1,348 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tsushima: Konki | Ultimate Dark Gothic</title>
+    <link id="dynamic-favicon" rel="icon" type="image/png" href="https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/6229f51c-567f-45bc-b15d-9ec81b7c5871/41ykdLe0W5L._AC_UF894%2C1000_QL80_.png">
+    <title>Revenant of Tsushima | 開發進度看板</title>
     
-    <!-- 載入 Tailwind CSS (即時編譯版) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 載入 React 核心 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- 載入 Babel (讓瀏覽器即時看懂 JSX 語法) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- 自定義 CSS 與動畫 -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
 
         :root {
-            --abyss-black: #050507;
-            --midnight-blue: #090e17;
-            --cinnabar-red: #8B0000;
-            --cold-gold: #BCA371;
+            --color-bg: #070304;
+            --color-gold: #c3a362;
+            --color-blood: #8B0000;
+            --color-ether: #2a00ff;
         }
 
         body {
-            background-color: var(--abyss-black);
-            color: #e2e8f0;
+            background-color: var(--color-bg);
+            color: var(--color-gold);
             font-family: 'Noto Serif JP', serif;
-            overflow-x: hidden;
             margin: 0;
-            padding: 0;
+            overflow: hidden;
+            user-select: none;
         }
 
-        /* 電影感文字 */
-        .cinematic-text {
-            letter-spacing: 0.15em;
-            line-height: 1.8;
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-noto { font-family: 'Noto Serif JP', serif; }
+
+        .panel-texture {
+            background: linear-gradient(to bottom, rgba(26, 5, 8, 0.98), rgba(7, 3, 4, 1)),
+                        url('https://www.transparenttextures.com/patterns/black-scales.png');
+            box-shadow: -20px 0 50px rgba(0,0,0,0.95);
         }
 
-        /* 粒子/餘燼動畫 */
-        @keyframes float-ember {
-            0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
-            20% { opacity: 0.8; }
-            80% { opacity: 0.5; }
-            100% { transform: translateY(-100vh) translateX(50px) scale(0.5); opacity: 0; }
+        .nav-item {
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            letter-spacing: 0.25em;
         }
 
-        .ember {
-            position: fixed;
-            bottom: -10px;
-            background: var(--cinnabar-red);
-            border-radius: 50%;
-            filter: blur(2px);
-            z-index: 50;
-            pointer-events: none;
-            box-shadow: 0 0 10px var(--cinnabar-red), 0 0 20px #ff4500;
-        }
-
-        /* 霧氣動畫 */
-        @keyframes fog-drift {
-            0% { background-position: 0% 50%; opacity: 0.3; }
-            50% { opacity: 0.6; }
-            100% { background-position: 100% 50%; opacity: 0.3; }
-        }
-
-        .fog-overlay {
+        .nav-item::before {
+            content: '🌙';
             position: absolute;
-            inset: 0;
-            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-            animation: fog-drift 60s infinite linear alternate;
-            pointer-events: none;
-            mix-blend-mode: screen;
-        }
-
-        /* 哥德式發光文字 */
-        .gothic-glow {
-            text-shadow: 0 0 20px rgba(139, 0, 0, 0.8), 0 0 40px rgba(0, 0, 0, 0.9);
-        }
-
-        .gold-accent {
-            color: var(--cold-gold);
-        }
-
-        /* 緩慢浮現動畫 */
-        .fade-in-slow {
+            left: -35px;
             opacity: 0;
-            animation: fadeInSlow 3s forwards;
+            color: var(--color-blood);
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: #fff;
+            transform: translateX(12px);
+            text-shadow: 0 0 15px rgba(195, 163, 98, 0.6);
+        }
+
+        .nav-item.active::before { opacity: 1; transform: translateX(0); }
+
+        .ether-active .bg-layer {
+            filter: hue-rotate(240deg) saturate(1.4) contrast(1.3) brightness(0.6);
         }
         
-        @keyframes fadeInSlow {
-            to { opacity: 1; }
+        .ether-glitch {
+            animation: glitch 0.4s infinite;
+            color: var(--color-ether) !important;
+            text-shadow: 2px 0 #ff0055, -2px 0 #00ffff;
         }
 
-        /* 角色切換過渡 */
-        .bg-transition {
-            transition: background-image 0.8s ease-in-out;
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            25% { transform: translate(-1px, 1px); }
+            50% { transform: translate(1px, -1px); }
+            75% { transform: translate(-1px, -1px); }
+            100% { transform: translate(0); }
         }
+
+        .bg-layer { transition: filter 1.5s ease, background-image 1.2s ease-in-out; }
+        
+        .custom-scroll::-webkit-scrollbar { width: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--color-blood); }
     </style>
 </head>
 <body>
-    <!-- React 應用的掛載點 -->
     <div id="root"></div>
 
-    <!-- React 邏輯 (使用 Babel 處理 JSX) -->
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // --- 替換為內聯 SVG 圖標，避免依賴外部庫導致報錯 ---
-        const ChevronDown = ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>);
-        const Play = ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>);
-        const Volume2 = ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>);
-        const MonitorPlay = ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><polygon points="10 7.5 10 12.5 14 10 10 7.5"></polygon></svg>);
-        const Zap = ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>);
+        // ==========================================
+        // 👑 首席創辦人 Shiko 專屬設定區
+        // ==========================================
+        
+        const AURORA_A_LOGO = "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/fa0924c2-a73b-426b-ae22-14c6c0444ca4/Aurora.png?content-type=image%2Fpng"; 
+        const PROJECT_BRUSH_LOGO = "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/5fea3e5a-92bc-4dfa-bff9-cb246d84009e/RevenantOfTsushima_Logonew_a.png?content-type=image%2Fpng";
+        const BGM_URL = "https://audio.squarespace-cdn.com/content/v2/namespaces/website/libraries/68d7b579d57652029ec28fd5/assets/163c1d66-87e2-448f-8232-0b8b4694f0d9/japanese-calm-pianomoon-411035.mp3";
+        
+        const BACKGROUNDS = {
+            home:      { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/5311b3c0-3903-48fe-a74a-8b6fb8f6590d/20260301.png?q=80&w=2070', pos: 'center' },
+            story:     { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/9ff05f31-2878-4fa7-98aa-32512dabb83b/RoT_Comm11.png?q=80&w=2070', pos: 'center' },
+            world:     { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/801f9a5d-caca-4470-aa3d-16fcd5c3bc8f/ChatGPT+Image+Jul+17%2C+2025%2C+06_48_19+PM.png?q=80&w=2070', pos: 'center' },
+            character: { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/3f8b9b78-1f12-4844-80e5-04b2e941da1c/20260110_1.png?q=80&w=2070', pos: 'center' },
+            system:    { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/db500940-3860-4788-9715-6e03403c600f/ChatGPT+Image+Jul+17%2C+2025%2C+06_37_19+PM.png?q=80&w=2070', pos: 'center' }
+        };
 
-        // --- 角色資料 ---
-        const characters = [
-            {
-                id: 'mewa',
-                name: 'Tsushima Mewa',
-                romaji: '津島 真羽',
-                cv: 'Aika Kobayashi',
-                title: 'Prisoner of the Kagura Bell',
-                quote: '"Do you hear the bell? It is the call of the abyss..."',
-                bgImg: 'https://images.unsplash.com/photo-1601625463688-646f912b7a0f?q=80&w=1920&auto=format&fit=crop', 
-                avatar: 'https://images.unsplash.com/photo-1542080681-b52d382432af?q=80&w=400&auto=format&fit=crop'
-            },
-            {
-                id: 'yashamaru',
-                name: 'Yashamaru',
-                romaji: '夜叉丸',
-                cv: 'Takahiro Sakurai',
-                title: 'The Lost Demon Slayer',
-                quote: '"Everything this blade cuts is but an illusion of karma."',
-                bgImg: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?q=80&w=1920&auto=format&fit=crop', 
-                avatar: 'https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?q=80&w=400&auto=format&fit=crop'
-            },
-            {
-                id: 'chiyo',
-                name: 'Chiyo',
-                romaji: '千代',
-                cv: 'Kanon Takao',
-                title: 'Guide to the Underworld',
-                quote: '"Come, let us dance in the endless night of Edo..."',
-                bgImg: 'https://images.unsplash.com/photo-1558862107-d49ef2a04d72?q=80&w=1920&auto=format&fit=crop', 
-                avatar: 'https://images.unsplash.com/photo-1515552726023-7125c8d07fb3?q=80&w=400&auto=format&fit=crop'
-            }
+        const CHARACTER_ASSETS = {
+            mawa:    "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/cad06024-32c0-4de1-8254-ae8ac41a83dc/RoT_Mewa.png?q=80&w=800", // 津島真羽 V2
+            seishi:  "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/eaed0743-651e-479e-acd6-314e21362543/RoT_Seishi.png?q=80&w=800", // 東條誠士
+            kozueko: "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/8cad2350-7937-43fe-8502-79868ca6b83f/RoT_Kozueko.png?q=80&w=800"  // 豊川梢子
+        };
+
+        // ==========================================
+
+        const MENU_OPTIONS = [
+            { id: 'home',      title: 'HOME',      jp: '首頁' },
+            { id: 'story',     title: 'STORY',     jp: '聖ガミ覺醒' },
+            { id: 'world',     title: 'WORLD',     jp: '豊川鄉異聞' },
+            { id: 'character', title: 'CHARACTER', jp: '登場人物' },
+            { id: 'system',    title: 'SYSTEM',    jp: '遊戲機制' }
         ];
 
-        // --- 👑 替換為您的專屬 Logo 網址 ---
-        const STUDIO_LOGO = "https://api.iconify.design/game-icons:wolf-head.svg?color=%23BCA371";
-
-        function TsushimaKonkiApp() {
-            const [activeChar, setActiveChar] = useState(characters[0]);
-            const [scrollY, setScrollY] = useState(0);
+        function App() {
+            const [activeTab, setActiveTab] = useState('home');
+            const [etherSight, setEtherSight] = useState(false);
+            const [isMenuOpen, setIsMenuOpen] = useState(false); 
+            const [isPlaying, setIsPlaying] = useState(false);
+            const audioRef = useRef(null);
 
             useEffect(() => {
-                const handleScroll = () => setScrollY(window.scrollY);
-                window.addEventListener('scroll', handleScroll);
-                return () => window.removeEventListener('scroll', handleScroll);
+                const audio = new Audio(BGM_URL);
+                audio.loop = true;
+                audio.volume = 0.6;
+                audioRef.current = audio;
+                const unlock = () => { if (audio.paused) audio.play().then(() => setIsPlaying(true)).catch(() => {}); };
+                document.addEventListener('click', unlock);
+                return () => document.removeEventListener('click', unlock);
             }, []);
 
-            // 渲染餘燼粒子
-            const renderEmbers = () => {
-                return Array.from({ length: 20 }).map((_, i) => {
-                    const size = Math.random() * 4 + 2;
-                    const left = Math.random() * 100;
-                    const duration = Math.random() * 5 + 5;
-                    const delay = Math.random() * 5;
-                    
-                    return (
-                        <div
-                            key={i}
-                            className="ember"
-                            style={{
-                                width: `${size}px`,
-                                height: `${size}px`,
-                                left: `${left}vw`,
-                                animation: `float-ember ${duration}s ${delay}s infinite linear`
-                            }}
-                        />
-                    );
-                });
-            };
+            useEffect(() => {
+                if (etherSight) document.body.classList.add('ether-active');
+                else document.body.classList.remove('ether-active');
+            }, [etherSight]);
 
-            return (
-                <div className="relative w-full min-h-screen bg-black">
-                    {/* 全域餘燼效果 */}
-                    {renderEmbers()}
-
-                    {/* 導覽列 */}
-                    <nav className="fixed top-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black/90 to-transparent">
-                        <a href="#" className="relative group flex items-center">
-                            <img 
-                                src={STUDIO_LOGO} 
-                                alt="Studio Logo" 
-                                className="h-10 md:h-12 w-auto object-contain transition-all duration-500 opacity-90 group-hover:opacity-100 group-hover:drop-shadow-[0_0_15px_rgba(188,163,113,0.8)]"
-                                onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'block';
-                                }}
-                            />
-                            <div className="hidden text-xl font-black tracking-widest text-[#BCA371] gothic-glow uppercase">
-                                TSUSHIMA・KONKI
+            const renderContent = () => {
+                switch (activeTab) {
+                    case 'home':
+                        return (
+                            <div className="max-w-4xl px-8 text-center animate-[fadeIn_1s_ease-out] flex flex-col items-center">
+                                <h2 className={`text-3xl md:text-5xl font-light tracking-[0.3em] mb-8 font-noto transition-colors duration-1000 ${etherSight ? 'text-blue-400 drop-shadow-[0_0_10px_rgba(42,0,255,0.8)]' : 'text-red-900'}`}>
+                                    若神不救我，我便自封為神。
+                                </h2>
+                                <p className="text-sm md:text-base leading-relaxed tracking-[0.2em] text-gray-400 font-noto max-w-2xl mx-auto italic mb-12">
+                                    「我並非儀式的殘餘，而是主宰此處靈脈的——<span className={etherSight ? 'ether-glitch font-black' : ''}>聖ガミ真羽</span>。」
+                                </p>
+                                <div className="space-y-4 text-gray-500 font-noto text-xs md:text-sm tracking-[0.2em] opacity-80 uppercase">
+                                    <p>A Journey of Identity Reconstruction</p>
+                                    <p>Escape the oppression of godhood, find the path home.</p>
+                                </div>
                             </div>
-                        </a>
-                        <div className="hidden md:flex gap-8 text-sm tracking-widest text-gray-400">
-                            <a href="#story" className="hover:text-red-700 transition-colors uppercase">Story</a>
-                            <a href="#characters" className="hover:text-red-700 transition-colors uppercase">Characters</a>
-                            <a href="#tech" className="hover:text-red-700 transition-colors uppercase">Visuals</a>
-                        </div>
-                        <Volume2 className="w-5 h-5 text-gray-400 cursor-pointer hover:text-red-700 transition-colors" />
-                    </nav>
+                        );
 
-                    {/* 首屏 (Hero Section) */}
-                    <section className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden">
-                        <div 
-                            className="absolute inset-0 bg-cover bg-center transform scale-105"
-                            style={{ 
-                                backgroundImage: `url('https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070&auto=format&fit=crop')`, 
-                                transform: `scale(${1 + scrollY * 0.0002}) translateY(${scrollY * 0.2}px)`
-                            }}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050507]/60 to-[#050507]"></div>
-                            <div className="fog-overlay"></div>
-                        </div>
-
-                        <div className="relative z-10 text-center flex flex-col items-center mt-20 fade-in-slow">
-                            <p className="text-[#BCA371] tracking-[1em] text-sm md:text-base mb-6 font-light uppercase">
-                                Ultimate Dark Gothic × Edo Japan
-                            </p>
-                            <h1 className="text-5xl md:text-7xl font-black text-white mb-4 gothic-glow tracking-widest uppercase">
-                                Tsushima: Konki
-                            </h1>
-                            <p className="text-red-800 text-xl tracking-[0.5em] font-bold mb-16 gothic-glow">
-                                津島・魂鬼
-                            </p>
-                            
-                            <button className="group relative px-8 py-4 border border-[#8B0000] bg-black/40 backdrop-blur-sm overflow-hidden flex items-center gap-3 transition-all hover:bg-[#8B0000]/20">
-                                <div className="absolute inset-0 w-0 bg-[#8B0000] transition-all duration-500 ease-out group-hover:w-full opacity-30"></div>
-                                <Play className="w-4 h-4 text-[#BCA371] group-hover:text-white transition-colors" />
-                                <span className="text-[#BCA371] tracking-widest text-sm group-hover:text-white transition-colors relative z-10 uppercase">
-                                    Watch Trailer
-                                </span>
-                            </button>
-                        </div>
-
-                        <div className="absolute bottom-10 animate-bounce text-gray-600">
-                            <ChevronDown className="w-8 h-8" />
-                        </div>
-                    </section>
-
-                    {/* 故事與世界觀 */}
-                    <section id="story" className="relative w-full min-h-[80vh] flex items-center justify-center py-24 bg-[#050507]">
-                        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between w-full">
-                            <div className="hidden md:flex flex-col items-center justify-center opacity-30">
-                                <div className="w-[1px] h-32 bg-gradient-to-b from-transparent to-[#8B0000] mb-4"></div>
-                                <div className="w-4 h-4 rotate-45 border border-[#BCA371]"></div>
-                                <div className="w-[1px] h-64 bg-gradient-to-t from-transparent to-[#8B0000] mt-4"></div>
-                            </div>
-                            <div className="flex flex-col gap-6 items-start justify-center min-h-[400px]">
-                                <p className="cinematic-text text-xl md:text-3xl text-gray-300 font-bold fade-in-slow" style={{ animationDelay: '0.2s' }}>
-                                    When the Kagura bell rings,
-                                </p>
-                                <p className="cinematic-text text-xl md:text-3xl text-gray-300 font-bold fade-in-slow" style={{ animationDelay: '0.6s' }}>
-                                    Is it a god that awakens...
-                                </p>
-                                <p className="cinematic-text text-xl md:text-3xl text-gray-300 font-bold fade-in-slow" style={{ animationDelay: '1s' }}>
-                                    Or a <span className="text-[#8B0000] gothic-glow">slumbering demon</span>?
-                                </p>
-                                <div className="w-full h-[1px] bg-[#333] my-4"></div>
-                                <p className="text-lg md:text-xl text-gray-500 font-light fade-in-slow tracking-widest uppercase" style={{ animationDelay: '1.4s' }}>
-                                    Hellfire from the abyss shall consume the glory of Edo.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* 角色展示 */}
-                    <section id="characters" className="relative w-full h-screen overflow-hidden bg-black">
-                        <div 
-                            className="absolute inset-0 bg-cover bg-center bg-transition opacity-40 mix-blend-luminosity"
-                            style={{ backgroundImage: `url(${activeChar.bgImg})` }}
-                        ></div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#050507] via-transparent to-[#050507]"></div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#050507] via-transparent to-transparent"></div>
-
-                        <div className="relative z-10 w-full h-full max-w-7xl mx-auto px-6 py-24 flex flex-col justify-end md:flex-row md:items-center">
-                            <div className="flex-1 mb-10 md:mb-0">
-                                <h3 className="text-[#BCA371] tracking-[0.3em] text-sm mb-2 font-light border-b border-[#8B0000] inline-block pb-1">
-                                    CAST
+                    case 'story':
+                        return (
+                            <div className="max-w-3xl px-8 py-12 animate-[fadeIn_0.8s_ease-out] flex flex-col items-center">
+                                <h3 className={`text-xl border-l-4 pl-4 mb-10 tracking-[0.4em] font-noto font-bold ${etherSight ? 'border-blue-600 text-blue-300' : 'border-red-900 text-white'}`}>
+                                    聖ガミ・覺醒態：影藏殿的幻覺
                                 </h3>
-                                <div className="flex items-baseline gap-4 mb-2">
-                                    <h2 className="text-5xl md:text-7xl font-black text-white gothic-glow">
-                                        {activeChar.name}
-                                    </h2>
-                                </div>
-                                <p className="text-gray-400 tracking-widest text-lg mb-8 uppercase">
-                                    {activeChar.romaji}
-                                </p>
-                                
-                                <p className="text-xl text-gray-300 italic mb-8 border-l-2 border-[#8B0000] pl-4 py-2 bg-black/20 backdrop-blur-sm">
-                                    {activeChar.quote}
-                                </p>
-
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-[#BCA371] text-xs tracking-widest uppercase">Voice Actor</span>
-                                    <span className="text-2xl font-bold text-white tracking-widest">{activeChar.cv}</span>
+                                <div className="space-y-8 text-sm md:text-base leading-loose tracking-[0.15em] text-gray-300 font-noto bg-black/60 p-10 border border-gray-900 backdrop-blur-xl shadow-2xl">
+                                    <p>你將扮演被幕府追捕的巫女「聖ガミ真羽」津島真羽，與年輕陰陽師東條誠士並肩而行。在充滿靈界異象的荒村與古道間徘徊，你們唯一的依靠是那輛由靈獸牽引、緩緩前行的牛車。</p>
+                                    <p className={`${etherSight ? 'ether-glitch text-lg' : 'text-red-800'} font-bold italic`}>
+                                        「真羽已經在那場大火中死去了……現在留下的，只有這個自封為神的怪物。」
+                                    </p>
+                                    <p>現實與靈界在此重疊。面對的不只是幕府的捕殺，還有隨時可能因過載而失控的靈魂負荷，並在神格化與人性間做出抉擇。</p>
                                 </div>
                             </div>
+                        );
 
-                            <div className="w-full md:w-1/3 flex flex-row md:flex-col gap-4 overflow-x-auto md:overflow-visible pb-4 md:pb-0">
-                                {characters.map((char) => (
-                                    <button
-                                        key={char.id}
-                                        onClick={() => setActiveChar(char)}
-                                        className={`group relative flex items-center gap-4 p-4 border transition-all duration-300 text-left min-w-[250px]
-                                            ${activeChar.id === char.id 
-                                                ? 'border-[#8B0000] bg-black/60 shadow-[0_0_15px_rgba(139,0,0,0.3)]' 
-                                                : 'border-gray-800 bg-black/20 hover:border-[#BCA371]/50'}`}
-                                    >
-                                        <div className="w-16 h-16 rounded-full overflow-hidden border border-gray-700 group-hover:border-[#BCA371] transition-colors shrink-0">
-                                            <img src={char.avatar} alt={char.name} className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all" />
+                    case 'world':
+                        return (
+                            <div className="max-w-4xl px-8 py-12 animate-[fadeIn_0.8s_ease-out] font-noto flex flex-col items-center">
+                                <div className="mb-12 border-b border-red-900/30 pb-8 text-center w-full">
+                                    <h3 className="text-2xl tracking-[0.5em] mb-4 text-red-800 font-bold uppercase">World: Toyokawa Village</h3>
+                                    <p className={`text-xs tracking-[0.5em] italic transition-all duration-700 ${etherSight ? 'ether-glitch text-lg' : 'text-gray-600'}`}>「我是，善子じゃない……」</p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full">
+                                    <div className="space-y-6">
+                                        <h4 className="text-lg font-bold border-l-4 border-red-900 pl-4 text-white tracking-widest uppercase">支線村落：豊川鄉</h4>
+                                        <p className="text-sm leading-loose tracking-[0.15em] text-gray-400">
+                                            玩家調查村內異象時，會在「舊神社後山的封閉洞屋」發現一位神色落寞的少女。洞屋牆上畫滿童年瓜田場景，並寫有一段被塗改過的咒語……
+                                        </p>
+                                    </div>
+                                    <div className="bg-stone-950/60 p-8 border border-red-900/20 backdrop-blur-md">
+                                        <h5 className="text-[10px] font-black mb-6 tracking-[0.4em] text-red-900 uppercase border-b border-red-900/20 pb-2">【靈魂事件：真羽的殘響】</h5>
+                                        <p className="text-xs leading-relaxed text-gray-400">
+                                            在豊川鄉的紅黑扭曲模式中，真羽會產生人性人格的強烈排斥。玩家必須決定是讓她繼續以「聖ガミ」自居，還是面對那個痛苦的「真羽」。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+
+                    case 'character':
+                        return (
+                            <div className="max-w-7xl px-8 py-12 animate-[fadeIn_0.8s_ease-out] font-noto w-full">
+                                <div className="text-center mb-16">
+                                    <h3 className="text-2xl tracking-[0.5em] text-white font-bold uppercase">Cast List</h3>
+                                    <p className="text-[10px] text-gray-600 tracking-[0.3em] mt-2 font-cinzel">Core Dramatis Personae</p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    {/* 津島真羽 */}
+                                    <div className="flex flex-col items-center group">
+                                        <div className="relative w-full aspect-[3/4] mb-6 border border-red-900/20 p-1 bg-black/40 overflow-hidden">
+                                            <img src={CHARACTER_ASSETS.mawa} className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 scale-105 group-hover:scale-100" />
                                         </div>
-                                        <div>
-                                            <div className={`text-sm tracking-widest mb-1 ${activeChar.id === char.id ? 'text-[#BCA371]' : 'text-gray-500'}`}>
-                                                {char.title}
-                                            </div>
-                                            <div className={`text-xl font-bold tracking-widest ${activeChar.id === char.id ? 'text-white' : 'text-gray-400'}`}>
-                                                {char.name}
-                                            </div>
+                                        <h4 className="text-xl font-bold text-[#c3a362] mb-1">津島 真羽</h4>
+                                        <p className="text-[9px] text-red-900 tracking-[0.3em] font-black mb-4">【自封神格・墮天巫女】</p>
+                                        <p className="text-[11px] leading-relaxed text-gray-500 text-center px-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            自稱為「聖ガミ真羽」，既然神不救我，我便自封為神。高傲冷酷的聲線背後，是「回家」的卑微願望。
+                                        </p>
+                                    </div>
+                                    {/* 東條誠士 */}
+                                    <div className="flex flex-col items-center group">
+                                        <div className="relative w-full aspect-[3/4] mb-6 border border-gray-800 p-1 bg-black/40 overflow-hidden">
+                                            <img src={CHARACTER_ASSETS.seishi} className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 scale-105 group-hover:scale-100" />
                                         </div>
-                                    </button>
-                                ))}
+                                        <h4 className="text-xl font-bold text-white mb-1">東條 誠士</h4>
+                                        <p className="text-[9px] text-gray-600 tracking-[0.3em] font-black mb-4 font-cinzel">【現實錨點・陰陽師】</p>
+                                        <p className="text-[11px] leading-relaxed text-gray-500 text-center px-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            唯一能直視「聖ガミ」的人。透過咒文引導牛車，防止真羽徹底迷失。
+                                        </p>
+                                    </div>
+                                    {/* 豊川梢子 */}
+                                    <div className="flex flex-col items-center group">
+                                        <div className="relative w-full aspect-[3/4] mb-6 border border-red-900/20 p-1 bg-black/40 overflow-hidden">
+                                            <img src={CHARACTER_ASSETS.kozueko} className="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 scale-105 group-hover:scale-100" />
+                                        </div>
+                                        <h4 className="text-xl font-bold text-[#c3a362] mb-1">豊川 梢子</h4>
+                                        <p className="text-[9px] text-gray-500 tracking-[0.3em] font-black mb-4">【毛倡妓・庄屋之獻祭】</p>
+                                        <p className="text-[11px] leading-relaxed text-gray-500 text-center px-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            豊川村庄屋之女。被最信任的父親親手推向祭壇。手持無弦古箏，隱居於洞屋，彈奏著只有怨恨能聽見的靈性殘響，與真羽的記憶劇烈共鳴。
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </section>
+                        );
 
-                    {/* 技術與實機 */}
-                    <section id="tech" className="relative w-full py-24 bg-[#090e17] border-t border-gray-900">
-                        <div className="max-w-7xl mx-auto px-6">
-                            <div className="text-center mb-16">
-                                <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-widest">VISUAL <span className="text-[#8B0000]">EXCELLENCE</span></h2>
-                                <p className="text-gray-400 tracking-widest text-sm uppercase">The ultimate psychological horror experience.</p>
-                            </div>
-
-                            <div className="flex flex-wrap justify-center gap-4 mb-12">
-                                <span className="px-4 py-2 border border-gray-700 text-gray-300 text-xs tracking-widest flex items-center gap-2 bg-black/50">
-                                    <Zap className="w-3 h-3 text-[#BCA371]" /> UNREAL ENGINE 5
-                                </span>
-                                <span className="px-4 py-2 border border-gray-700 text-gray-300 text-xs tracking-widest flex items-center gap-2 bg-black/50">
-                                    <MonitorPlay className="w-3 h-3 text-[#BCA371]" /> 4K ULTRA HD
-                                </span>
-                                <span className="px-4 py-2 border border-[#8B0000]/50 text-red-400 text-xs tracking-widest flex items-center gap-2 bg-[#8B0000]/10 shadow-[0_0_10px_rgba(139,0,0,0.2)]">
-                                    PSYCHOLOGICAL HORROR
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    case 'system':
+                        return (
+                            <div className="max-w-6xl px-8 py-12 animate-[fadeIn_0.8s_ease-out] grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 text-gray-300 font-noto">
                                 {[
-                                    "https://images.unsplash.com/photo-1505635552518-3448ff116af3?q=80&w=1000&auto=format&fit=crop", 
-                                    "https://images.unsplash.com/photo-1596700816086-560965e69e46?q=80&w=1000&auto=format&fit=crop", 
-                                    "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop"  
-                                ].map((img, idx) => (
-                                    <div key={idx} className="group relative aspect-video overflow-hidden border border-gray-800 cursor-pointer">
-                                        <img 
-                                            src={img} 
-                                            alt="Game Screenshot" 
-                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 mix-blend-luminosity group-hover:mix-blend-normal opacity-70 group-hover:opacity-100"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
-                                            <span className="text-[#BCA371] text-xs tracking-widest border-l-2 border-[#8B0000] pl-2 uppercase">
-                                                Screenshot {idx + 1}
-                                            </span>
-                                        </div>
+                                    { t: "神格穩定度 (Godhood Stability)", d: "當真羽自稱為「聖ガミ」時，靈力爆發但與環境的排斥感（Glitch 效果）增強。過度依賴神格力量將導致人性喪失。" },
+                                    { t: "御守負擔與神社儀式", d: "捕捉亡靈是為了生存。累積的靈魂是儲存的風險，必須抵達神社進行超渡，否則「聖ガミ」的意識將反噬現實。" },
+                                    { t: "牛車：兩人的流動聖域", d: "真羽與誠士共同乘坐的移動存檔點。在緩慢行進的車廂內，是唯一能讓「聖ガミ」狀態稍微放鬆、展現人性脆弱的時刻。" },
+                                    { t: "觀靈與手印封神", d: "以「聖ガミ」的俯瞰視角觀察靈界殘響，並透過精準的手印軌跡，強行干預並赦免那些失控的靈脈。" }
+                                ].map((item, i) => (
+                                    <div key={i} className="flex flex-col items-center md:items-start group border-t border-gray-900 pt-6">
+                                        <h4 className="text-lg font-bold tracking-[0.2em] text-[#c3a362] mb-3 group-hover:text-white transition-colors">{item.t}</h4>
+                                        <p className="text-xs leading-relaxed tracking-[0.15em] opacity-60 text-center md:text-left">{item.d}</p>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    </section>
+                        );
+                    default: return null;
+                }
+            };
 
-                    {/* Footer */}
-                    <footer className="w-full py-12 bg-black border-t border-[#8B0000]/30 text-center flex flex-col items-center">
-                        <img 
-                            src={STUDIO_LOGO} 
-                            alt="Studio Logo" 
-                            className="h-10 w-auto object-contain mb-6 opacity-30 hover:opacity-100 transition-opacity duration-500 grayscale hover:grayscale-0"
-                            onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'block';
-                            }}
-                        />
-                        <h2 className="hidden text-2xl font-black text-gray-700 tracking-[0.5em] mb-6 uppercase">Tsushima: Konki</h2>
-                        <p className="text-gray-600 text-xs tracking-widest uppercase">
-                            © 2026 TSUSHIMA: KONKI PROJECT. ALL RIGHTS RESERVED.<br/>
-                            (Concept Prototype by AI based on User's Guideline)
-                        </p>
-                    </footer>
+            return (
+                <div className="relative w-screen h-screen bg-black overflow-hidden flex font-noto">
+                    {/* 1. 背景圖層 */}
+                    <div className="absolute inset-0 w-full h-full bg-layer bg-cover transition-all duration-[1.5s] ease-in-out opacity-45"
+                        style={{ 
+                            backgroundImage: `url(${BACKGROUNDS[activeTab]?.url || BACKGROUNDS['home'].url})`, 
+                            backgroundPosition: BACKGROUNDS[activeTab]?.pos || 'center' 
+                        }}
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#070304]"></div>
+                    </div>
+
+                    {/* 2. 品牌 Header */}
+                    <div className="absolute top-8 left-10 z-50 flex items-center gap-6">
+                        <img src={AURORA_A_LOGO} className="w-14 h-14 object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] cursor-pointer hover:scale-105 transition-all" onClick={() => setActiveTab('home')} />
+                        <div className="flex flex-col border-l border-[#8b0000]/40 pl-6">
+                            <span className="text-[10px] text-gray-500 tracking-[0.5em] font-cinzel uppercase mb-1 opacity-60">Produced by</span>
+                            <span className="text-sm text-[#c3a362] tracking-[0.3em] font-black font-cinzel">AURORA STUDIO</span>
+                        </div>
+                    </div>
+
+                    {/* 3. 齒輪開關 (右上角固定) */}
+                    <div className="absolute top-8 right-10 z-[100] w-14 h-14 cursor-pointer group" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                        <svg viewBox="0 0 100 100" className={`absolute inset-0 w-full h-full text-[#c3a362] transition-transform duration-[1.5s] ${isMenuOpen ? 'rotate-[360deg]' : 'rotate-0'}`}>
+                            <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="6 4" />
+                            {Array.from({length: 12}).map((_, i) => (<path key={i} d="M48 2 L52 2 L54 10 L46 10 Z" fill="currentColor" transform={`rotate(${i * 30} 50 50)`} />))}
+                        </svg>
+                        <div className="absolute inset-[18%] bg-gradient-to-br from-[#8b0000] to-[#2a0303] rounded-full flex items-center justify-center border border-red-900/30">
+                            <span className={`text-[#c3a362] font-cinzel text-xl transition-all duration-700 ${isMenuOpen ? 'scale-100 rotate-0' : 'scale-0 rotate-90 absolute'}`}>X</span>
+                            <div className={`flex flex-col gap-1 transition-all duration-700 ${isMenuOpen ? 'scale-0 -rotate-90 absolute' : 'scale-100 rotate-0'}`}><div className="w-5 h-[1.5px] bg-[#c3a362]" /><div className="w-5 h-[1.5px] bg-[#c3a362]" /><div className="w-5 h-[1.5px] bg-[#c3a362]" /></div>
+                        </div>
+                    </div>
+
+                    {/* 🏆 4. 全域置中 Logo (中軸線) */}
+                    <div className={`absolute left-0 w-full flex justify-center pointer-events-none z-50 transition-all duration-[1s] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${isMenuOpen ? 'md:pr-80' : 'pr-0'} ${activeTab === 'home' ? 'top-[16%] md:top-[14%]' : 'top-8 md:top-10'}`}>
+                        <img src={PROJECT_BRUSH_LOGO} className={`filter drop-shadow-[0_0_25px_rgba(139,0,0,0.8)] transition-all duration-[1s] ${activeTab === 'home' ? 'w-[420px] md:w-[580px]' : 'w-[200px] md:w-[280px] opacity-40'}`} />
+                    </div>
+
+                    {/* 5. 置中內容容器 */}
+                    <div className={`flex-1 h-full relative flex flex-col items-center justify-center pt-24 pb-12 transition-all duration-[0.8s] ${isMenuOpen ? 'md:pr-80' : 'pr-0'}`}>
+                        {renderContent()}
+                        <div className="absolute bottom-10 w-full text-[9px] text-gray-700 tracking-[0.5em] font-cinzel text-center opacity-40">© 2026 AURORA STUDIO. ALL RIGHTS RESERVED.</div>
+                    </div>
+
+                    {/* 6. 右側劇場選單 */}
+                    <div className={`absolute right-0 top-0 h-full w-72 md:w-80 panel-texture flex flex-col justify-center px-12 z-50 border-l border-[#8b0000]/20 transform transition-transform duration-[0.8s] ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                        <div className="mb-14 flex flex-col items-start gap-2 cursor-pointer group" onClick={() => setEtherSight(!etherSight)}>
+                            <div className="flex items-center gap-4">
+                                <div className={`w-5 h-5 transform rotate-45 border border-[#c3a362]/40 flex items-center justify-center transition-all ${etherSight ? 'bg-[#2a00ff]/20 shadow-[0_0_15px_#2a00ff]' : ''}`}>{etherSight && <div className="w-2.5 h-2.5 bg-[#2a00ff]"></div>}</div>
+                                <span className={`font-cinzel tracking-[0.4em] text-sm ${etherSight ? 'text-white' : 'text-[#c3a362] opacity-60'}`}>ETHER SIGHT</span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-9">
+                            {MENU_OPTIONS.map(opt => (
+                                <div key={opt.id} className={`nav-item cursor-pointer flex flex-col ${activeTab === opt.id ? 'active' : ''}`} onClick={() => setActiveTab(opt.id)}>
+                                    <span className="font-cinzel text-xl md:text-2xl font-black">{opt.title}</span>
+                                    <span className="text-[10px] opacity-40 tracking-[0.5em] mt-1 font-bold">{opt.jp}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="absolute bottom-16 left-12 flex gap-5">
+                            <div className="w-11 h-11 border border-[#c3a362]/20 flex items-center justify-center hover:bg-[#c3a362]/10 cursor-pointer transform rotate-45 transition-all hover:rotate-0 group" onClick={(e) => { e.stopPropagation(); isPlaying ? audioRef.current.pause() : audioRef.current.play(); setIsPlaying(!isPlaying); }}>
+                                <span className="transform -rotate-45 text-sm">{isPlaying ? '♪' : '🔇'}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             );
         }
-
-        // --- 將 React 元件掛載到 HTML 上 ---
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<TsushimaKonkiApp />);
+        root.render(<App />);
     </script>
 </body>
 </html>
