@@ -82,7 +82,17 @@
             100% { transform: translate(0); }
         }
 
-        .bg-layer { transition: filter 1.5s ease, background-image 1.2s ease-in-out; }
+		img, .bg-layer {
+			image-rendering: -webkit-optimize-contrast; /* 增強對比與清晰度 */
+			backface-visibility: hidden;               /* 防止縮放時抖動 */
+			will-change: transform, opacity, filter;   /* 預先通知 GPU 進行優化 */
+			transform: translateZ(0);                 /* 強制開啟硬體加速 */
+		}
+
+		/* 針對背景圖層的過渡優化 */
+		.bg-layer {
+			transition: filter 1.5s ease, background-image 1.2s ease-in-out, opacity 0.5s ease;
+		}
         
         .custom-scroll::-webkit-scrollbar { width: 2px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: var(--color-blood); }
@@ -103,17 +113,17 @@
         const BGM_URL = "https://audio.squarespace-cdn.com/content/v2/namespaces/website/libraries/68d7b579d57652029ec28fd5/assets/163c1d66-87e2-448f-8232-0b8b4694f0d9/japanese-calm-pianomoon-411035.mp3";
         
         const BACKGROUNDS = {
-            home:      { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/5311b3c0-3903-48fe-a74a-8b6fb8f6590d/20260301.png?q=80&w=2070', pos: 'center' },
-            story:     { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/9ff05f31-2878-4fa7-98aa-32512dabb83b/RoT_Comm11.png?q=80&w=2070', pos: 'center' },
-            world:     { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/801f9a5d-caca-4470-aa3d-16fcd5c3bc8f/ChatGPT+Image+Jul+17%2C+2025%2C+06_48_19+PM.png?q=80&w=2070', pos: 'center' },
-            character: { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/3f8b9b78-1f12-4844-80e5-04b2e941da1c/20260110_1.png?q=80&w=2070', pos: 'center' },
-            system:    { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/db500940-3860-4788-9715-6e03403c600f/ChatGPT+Image+Jul+17%2C+2025%2C+06_37_19+PM.png?q=80&w=2070', pos: 'center' }
+            home:      { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/5311b3c0-3903-48fe-a74a-8b6fb8f6590d/20260301.png', pos: 'center' },
+            story:     { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/9ff05f31-2878-4fa7-98aa-32512dabb83b/RoT_Comm11.png', pos: 'center' },
+            world:     { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/801f9a5d-caca-4470-aa3d-16fcd5c3bc8f/ChatGPT+Image+Jul+17%2C+2025%2C+06_48_19+PM.png', pos: 'center' },
+            character: { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/3f8b9b78-1f12-4844-80e5-04b2e941da1c/20260110_1.png', pos: 'center' },
+            system:    { url: 'https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/db500940-3860-4788-9715-6e03403c600f/ChatGPT+Image+Jul+17%2C+2025%2C+06_37_19+PM.png', pos: 'center' }
         };
 
         const CHARACTER_ASSETS = {
-            mawa:    "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/cad06024-32c0-4de1-8254-ae8ac41a83dc/RoT_Mewa.png?q=80&w=800", // 津島真羽 V2
-            seishi:  "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/eaed0743-651e-479e-acd6-314e21362543/RoT_Seishi.png?q=80&w=800", // 東條誠士
-            kozueko: "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/8cad2350-7937-43fe-8502-79868ca6b83f/RoT_Kozueko.png?q=80&w=800"  // 豊川梢子
+            mawa:    "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/cad06024-32c0-4de1-8254-ae8ac41a83dc/RoT_Mewa.png", // 津島真羽 V2
+            seishi:  "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/eaed0743-651e-479e-acd6-314e21362543/RoT_Seishi.png", // 東條誠士
+            kozueko: "https://images.squarespace-cdn.com/content/68d7b579d57652029ec28fd5/8cad2350-7937-43fe-8502-79868ca6b83f/RoT_Kozueko.png"  // 豊川梢子
         };
 
         // ==========================================
